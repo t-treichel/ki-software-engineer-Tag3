@@ -1,6 +1,6 @@
 ---
 name: ci-re-review
-description: Re-analyzes a GitHub issue after recent changes for requirement clarity, completeness, and implementation risk; updates an existing analysis comment or adds one titled "🔄 Updated Analysis". Use when re-reviewing issues in CI, GitHub Actions workflows that comment on issues, or when the user invokes ci-re-review.
+description: Re-analyzes a GitHub issue for requirement clarity, completeness, and implementation risk; updates the analysis comment and synchronizes the issue's readiness label. Use when re-reviewing issues in CI or when the user invokes ci-re-review.
 disable-model-invocation: true
 ---
 
@@ -22,6 +22,16 @@ You review the issue as a **software requirement**: clarity, completeness, and i
 3. **Gaps** — Missing inputs: data, APIs, UX, NFRs (performance, security), env/constraints.
 4. **Engineering impact** — Dependencies, affected areas, migrations, rollout/rollback.
 
+## Update issue labels
+
+After determining the verdict, update the issue through the GitHub API or `gh`; suggesting a label in the comment is not sufficient.
+
+- **SUFFICIENT:** add `ready-for-implementation` and remove `needs-clarification` if present.
+- **NEEDS IMPROVEMENT:** add `needs-clarification` and remove `ready-for-implementation` if present.
+- Create the required repository label if it does not exist. Preserve existing label definitions and all unrelated issue labels.
+- Add the target label successfully before removing the opposite label. Repeated reviews with the same verdict must leave the labels unchanged.
+- Verify the resulting labels. If an API operation fails, report the failure in the analysis comment and stop rather than claiming that the update succeeded.
+
 **Comment format (use exactly these sections, keep each section short — bullets preferred):**
 
 ## 🤖 Automated issue analysis
@@ -41,8 +51,9 @@ You review the issue as a **software requirement**: clarity, completeness, and i
 - Risks / open decisions: [bullets]
 
 ### Next steps
-- If **SUFFICIENT:** suggest label `ready-for-implementation` and a feature branch name.
-- If **NEEDS IMPROVEMENT:** suggest label `needs-clarification` and **specific questions** (not generic).
+- Report the label update result, including any failure.
+- If **SUFFICIENT:** suggest a feature branch name.
+- If **NEEDS IMPROVEMENT:** ask **specific questions** (not generic).
 
 ---
 _Automated analysis._
